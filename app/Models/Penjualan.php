@@ -1,39 +1,38 @@
 <?php
 
-namespace App\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Penjualan extends Model
+return new class extends Migration
 {
-    protected $table = 't_penjualan';
-    protected $primaryKey = 'penjualan_id';
-
-    protected $fillable = [
-        'user_id',
-        'pembeli',
-        'penjualan_kode',
-        'penjualan_tanggal'
-    ];
-
-    protected $casts = [
-        'penjualan_tanggal' => 'datetime',
-    ];
-
-    protected static function booted()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
-        static::deleting(function ($penjualan) {
-            $penjualan->detail()->delete();
+        Schema::create('t_penjualan_detail', function (Blueprint $table) {
+            $table->id('detail_id');
+
+            $table->foreignId('penjualan_id')
+                ->constrained('t_penjualan', 'penjualan_id')
+                ->cascadeOnDelete();
+
+            $table->foreignId('barang_id')
+                ->constrained('m_barang', 'barang_id');
+
+            $table->integer('harga');
+            $table->integer('jumlah');
+
+            $table->timestamps();
         });
     }
 
-    public function user()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        return $this->belongsTo(User::class, 'user_id');
+        Schema::dropIfExists('t_penjualan_detail');
     }
-
-    public function detail()
-    {
-        return $this->hasMany(PenjualanDetail::class, 'penjualan_id');
-    }
-}
+};
